@@ -107,6 +107,7 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
     private static final String KEY_RECENTS_CLEAR_ALL = "pref_recents_clear_all";
     private static final String KEY_RECENTS_LENS = "pref_recents_lens";
     private static final String KEY_RECENTS_SHAKE_CLEAR_ALL = "pref_recents_shake_clear_all";
+    private static final String KEY_RECENTS_KILL_APP = "pref_recents_kill_app";
 
     private MultiValueAlpha mMultiValueAlpha;
     private Button mSplitButton;
@@ -135,6 +136,7 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
     private boolean mClearAll;
     private boolean mLens;
     private boolean mShakeClearAll;
+    private boolean mKillApp;
 
     private Launcher mLauncher;
 
@@ -152,6 +154,7 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
         mScreenshot = prefs.getBoolean(KEY_RECENTS_SCREENSHOT, true);
         mClearAll = prefs.getBoolean(KEY_RECENTS_CLEAR_ALL, true);
         mLens = prefs.getBoolean(KEY_RECENTS_LENS, false);
+        mKillApp = prefs.getBoolean(KEY_RECENTS_KILL_APP, false);
         prefs.registerOnSharedPreferenceChangeListener(this);
         mShakeUtils = new ShakeUtils(context);
         mShakeClearAll = prefs.getBoolean(KEY_RECENTS_SHAKE_CLEAR_ALL, true);
@@ -190,6 +193,11 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
         clearall.setOnClickListener(this);
         clearall.setVisibility(mClearAll ? VISIBLE : GONE);
         findViewById(R.id.clear_all_space).setVisibility(mClearAll ? VISIBLE : GONE);
+
+        View killApp = findViewById(R.id.kill_app);
+        killApp.setOnClickListener(this);
+        killApp.setVisibility(mKillApp ? VISIBLE : GONE);
+        findViewById(R.id.kill_app_space).setVisibility(mKillApp ? VISIBLE : GONE);
 
         View lens = findViewById(R.id.action_lens);
         lens.setOnClickListener(this);
@@ -236,6 +244,8 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
         } else if (id == R.id.action_lens) {
             VibratorWrapper.INSTANCE.get(getContext()).vibrate(VibratorWrapper.EFFECT_CLICK);
             mCallbacks.onLens();
+        } else if (id == R.id.kill_app) {
+            mCallbacks.onKillApp();
         }
     }
 
@@ -262,6 +272,7 @@ public class OverviewActionsView<T extends OverlayUICallbacks> extends FrameLayo
             mLens = prefs.getBoolean(KEY_RECENTS_LENS, false);
         } else if (key.equals(KEY_RECENTS_SHAKE_CLEAR_ALL)) {
             mShakeClearAll = prefs.getBoolean(KEY_RECENTS_SHAKE_CLEAR_ALL, true);
+            mKillApp = prefs.getBoolean(KEY_RECENTS_KILL_APP, false);
         }
         updateVisibilities();
     }

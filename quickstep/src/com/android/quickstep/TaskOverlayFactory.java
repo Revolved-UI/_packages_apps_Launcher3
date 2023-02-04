@@ -23,12 +23,16 @@ import static com.android.quickstep.views.OverviewActionsView.DISABLED_ROTATED;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
 import android.content.Context;
+import android.content.ComponentName;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Build;
 import android.text.format.Formatter;
+import android.os.UserHandle;
 import android.view.View;
 import android.widget.Toast;
 
@@ -256,6 +260,23 @@ public class TaskOverlayFactory implements ResourceBasedOverride {
             if (recentsView != null) {
                 recentsView.startHome();
                 mImageApi.startLensActivity();
+
+            }
+        }
+
+        private void killApp() {
+            final RecentsView recentsView = mThumbnailView.getTaskView().getRecentsView();
+            IActivityManager am = ActivityManagerNative.getDefault();
+            TaskView tv = recentsView.getNextPageTaskView();
+            Task task = tv.getTask();
+            String pkgname = task.key.getPackageName();
+            if (task != null) {
+                try {
+                    am.forceStopPackage(pkgname, UserHandle.USER_CURRENT);
+                } catch (Throwable t) {
+                    //TODO: handle exception
+                }
+                recentsView.dismissTask(tv, true, true);
             }
         }
 
@@ -380,6 +401,11 @@ public class TaskOverlayFactory implements ResourceBasedOverride {
             }
 
             @Override
+            public void onKillApp() {
+                endLiveTileMode(TaskOverlay.this::killApp);
+            }
+
+            @Override
             public void onLens() {
                 if (mIsAllowedByPolicy) {
                     endLiveTileMode(TaskOverlay.this::launchLens);
@@ -402,6 +428,8 @@ public class TaskOverlayFactory implements ResourceBasedOverride {
         void onSplit();
 
         void onClearAllTasksRequested();
+        
+        void onKillApp();
 
         void onLens();
     }
